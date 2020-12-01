@@ -58,6 +58,7 @@ namespace MandelWindow
             app.Run();
         }
 
+        //Zoom Out
         static void image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             int column = (int)e.GetPosition(image).X;
@@ -71,6 +72,7 @@ namespace MandelWindow
             UpdateMandel();
         }
 
+        //Zoom In
         static void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             int column = (int)e.GetPosition(image).X;
@@ -84,6 +86,7 @@ namespace MandelWindow
             UpdateMandel();
         }
 
+        //Zoom In/Out
         static void window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             int column = (int)e.GetPosition(image).X;
@@ -107,6 +110,7 @@ namespace MandelWindow
             UpdateMandel();
         }
 
+        //Track mousePosition
         static void image_MouseMove(object sender, MouseEventArgs e)
         {
             int column = (int)e.GetPosition(image).X;
@@ -118,6 +122,7 @@ namespace MandelWindow
             windows.Title = $"Mandelbrot center X:{mouseCenterX} Y:{mouseCenterY}";
         }
 
+        //Mandel dimensions
         static double mandelCenterX = 0.0;
         static double mandelCenterY = 0.0;
         static double mandelWidth = 2.0;
