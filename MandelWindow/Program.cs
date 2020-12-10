@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Input;
+using Amplifier;
 
 namespace MandelWindow
 {
@@ -139,6 +141,7 @@ namespace MandelWindow
 
                 unsafe
                 {
+                    Stopwatch stopWatch = Stopwatch.StartNew();
                     for (int row = 0; row < bitmap.PixelHeight; row++)
                     {
                         for (int column = 0; column < bitmap.PixelWidth; column++)
@@ -151,6 +154,7 @@ namespace MandelWindow
                             pBackBuffer += column * 4;
 
                             int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
+                            //Denna ska paralleliseras. (En array)
 
                             int R, G, B;
                             HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
@@ -164,6 +168,8 @@ namespace MandelWindow
                             *((int*)pBackBuffer) = color_data;
                         }
                     }
+                    stopWatch.Stop();
+                    Console.WriteLine($"Elapsed time: {stopWatch.ElapsedMilliseconds} milliseconds");
                 }
 
                 // Specify the area of the bitmap that changed.
