@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Input;
-using System.Diagnostics;
+using Amplifier;
+using Amplifier.OpenCL;
 
 namespace MandelWindow
 {
@@ -118,10 +120,11 @@ namespace MandelWindow
 			app.Run();
 		}
 
-		static void image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-		{
-			int column = (int)e.GetPosition(image).X;
-			int row = (int)e.GetPosition(image).Y;
+        //Zoom Out
+        static void image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            int column = (int)e.GetPosition(image).X;
+            int row = (int)e.GetPosition(image).Y;
 
 			mandelCenterX = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
 			mandelCenterY = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
@@ -131,10 +134,11 @@ namespace MandelWindow
 			//UpdateMandel();
 		}
 
-		static void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-		{
-			int column = (int)e.GetPosition(image).X;
-			int row = (int)e.GetPosition(image).Y;
+        //Zoom In
+        static void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            int column = (int)e.GetPosition(image).X;
+            int row = (int)e.GetPosition(image).Y;
 
 			mandelCenterX = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
 			mandelCenterY = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
@@ -144,10 +148,11 @@ namespace MandelWindow
 			//UpdateMandel();
 		}
 
-		static void window_MouseWheel(object sender, MouseWheelEventArgs e)
-		{
-			int column = (int)e.GetPosition(image).X;
-			int row = (int)e.GetPosition(image).Y;
+        //Zoom In/Out
+        static void window_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            int column = (int)e.GetPosition(image).X;
+            int row = (int)e.GetPosition(image).Y;
 
 			if (e.Delta > 0)
 			{
@@ -167,10 +172,11 @@ namespace MandelWindow
 			//UpdateMandel();
 		}
 
-		static void image_MouseMove(object sender, MouseEventArgs e)
-		{
-			int column = (int)e.GetPosition(image).X;
-			int row = (int)e.GetPosition(image).Y;
+        //Track mousePosition
+        static void image_MouseMove(object sender, MouseEventArgs e)
+        {
+            int column = (int)e.GetPosition(image).X;
+            int row = (int)e.GetPosition(image).Y;
 
 			double mouseCenterX = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
 			double mouseCenterY = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
@@ -178,51 +184,103 @@ namespace MandelWindow
 			windows.Title = $"Mandelbrot center X:{mouseCenterX} Y:{mouseCenterY}";
 		}
 
-		static double mandelCenterX = 0.0;
-		static double mandelCenterY = 0.0;
-		static double mandelWidth = 2.0;
-		static double mandelHeight = 2.0;
+        //Mandel dimensions
+        static double mandelCenterX = 0.0;
+        static double mandelCenterY = 0.0;
+        static double mandelWidth = 2.0;
+        static double mandelHeight = 2.0;
 
 		public static int mandelDepth = 360;
 
-		public static void UpdateMandel(bool runAsParallel = false)
-		{
-			if (!runAsParallel)
-			{
-				try
-				{
-					// Reserve the back buffer for updates.
-					bitmap.Lock();
+        public static void UpdateMandel(bool parallel=true)
+        {
+            try
+            {
+                // Reserve the back buffer for updates.
+                bitmap.Lock();
 
-					unsafe
-					{
-						for (int row = 0; row < bitmap.PixelHeight; row++)
-						{
-							for (int column = 0; column < bitmap.PixelWidth; column++)
-							{
-								// Get a pointer to the back buffer.
-								IntPtr pBackBuffer = bitmap.BackBuffer;
+                unsafe
+                {
+                    if (parallel)
+                    {
+                        var compiler = new OpenCLCompiler();
+                        compiler.UseDevice(0);
+                        compiler.CompileKernel(typeof(Kernels));
+                        int totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+                        double[] cx = new double[totalPixels];
+                        double[] cy = new double[totalPixels];
+                        int[] result = new int[totalPixels];
 
-								// Find the address of the pixel to draw.
-								pBackBuffer += row * bitmap.BackBufferStride;
-								pBackBuffer += column * 4;
+                        int index = 0;
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        {
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                cy[index] = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
+                                cx[index] = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
+                                result[index] = 0;
+                                index++;
+                            }
+                        }
 
-								// Parallellisera denna raden. (Byts ut mot en array och flyttas till utanför Try blocket antagligen) (Är inte längre row column, utan endast en 1d-array isåfall)
-								int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
+                        var exec = compiler.GetExec();
+                        exec.IterCount(cx, cy, result, mandelDepth);
 
-								int R, G, B;
-								HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                        index = 0;
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        {
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                // Get a pointer to the back buffer.
+                                IntPtr pBackBuffer = bitmap.BackBuffer;
 
-								// Compute the pixel's color.
-								int color_data = R << 16; // R
-								color_data |= G << 8;   // G
-								color_data |= B << 0;   // B
+                                // Find the address of the pixel to draw.
+                                pBackBuffer += row * bitmap.BackBufferStride;
+                                pBackBuffer += column * 4;
 
-								// Assign the color data to the pixel.
-								*((int*)pBackBuffer) = color_data; // (Försök inte parallellisera denna)
-							}
-						}
-					}
+                                int R, G, B;
+                                HsvToRgb(result[index], 1.0, result[index] < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                                index++;
+
+                                // Compute the pixel's color.
+                                int color_data = R << 16; // R
+                                color_data |= G << 8;   // G
+                                color_data |= B << 0;   // B
+
+                                // Assign the color data to the pixel.
+                                *((int*)pBackBuffer) = color_data;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        {
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                // Get a pointer to the back buffer.
+                                IntPtr pBackBuffer = bitmap.BackBuffer;
+
+                                // Find the address of the pixel to draw.
+                                pBackBuffer += row * bitmap.BackBufferStride;
+                                pBackBuffer += column * 4;
+
+                                int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
+
+                                int R, G, B;
+                                HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+
+                                // Compute the pixel's color.
+                                int color_data = R << 16; // R
+                                color_data |= G << 8;   // G
+                                color_data |= B << 0;   // B
+
+                                // Assign the color data to the pixel.
+                                *((int*)pBackBuffer) = color_data;
+                            }
+                        }
+                    }
+                }
 
 					// Specify the area of the bitmap that changed.
 					bitmap.AddDirtyRect(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight));
