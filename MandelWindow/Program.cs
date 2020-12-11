@@ -142,8 +142,6 @@ namespace MandelWindow
 
                 unsafe
                 {
-                    Stopwatch stopWatch = Stopwatch.StartNew();
-
                     if (parallel)
                     {
                         var compiler = new OpenCLCompiler();
@@ -223,9 +221,6 @@ namespace MandelWindow
                             }
                         }
                     }
-                    stopWatch.Stop();
-                    Console.WriteLine($"Elapsed time: {stopWatch.ElapsedMilliseconds} milliseconds");
-                    // BLI AV MED BUFFER!!!!! KRASHAR AV MEMORY EFTER MÅNGA KLICK!!!
                 }
 
                 // Specify the area of the bitmap that changed.
