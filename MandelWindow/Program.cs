@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Input;
 using Amplifier;
+using Amplifier.OpenCL;
 
 namespace MandelWindow
 {
