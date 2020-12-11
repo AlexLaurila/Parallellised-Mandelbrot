@@ -132,7 +132,7 @@ namespace MandelWindow
 
         public static int mandelDepth = 360;
 
-        public static void UpdateMandel()
+        public static void UpdateMandel(bool parallel=true)
         {
             try
             {
@@ -142,34 +142,89 @@ namespace MandelWindow
                 unsafe
                 {
                     Stopwatch stopWatch = Stopwatch.StartNew();
-                    for (int row = 0; row < bitmap.PixelHeight; row++)
+
+                    if (parallel)
                     {
-                        for (int column = 0; column < bitmap.PixelWidth; column++)
+                        var compiler = new OpenCLCompiler();
+                        compiler.UseDevice(0);
+                        compiler.CompileKernel(typeof(Kernels));
+                        int totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+                        double[] cx = new double[totalPixels];
+                        double[] cy = new double[totalPixels];
+                        int[] result = new int[totalPixels];
+
+                        int index = 0;
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
                         {
-                            // Get a pointer to the back buffer.
-                            IntPtr pBackBuffer = bitmap.BackBuffer;
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                cy[index] = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
+                                cx[index] = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
+                                result[index] = 0;
+                                index++;
+                            }
+                        }
 
-                            // Find the address of the pixel to draw.
-                            pBackBuffer += row * bitmap.BackBufferStride;
-                            pBackBuffer += column * 4;
+                        var exec = compiler.GetExec();
+                        exec.IterCount(cx, cy, result, mandelDepth);
 
-                            int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
-                            //Denna ska paralleliseras. (En array)
+                        index = 0;
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        {
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                // Get a pointer to the back buffer.
+                                IntPtr pBackBuffer = bitmap.BackBuffer;
 
-                            int R, G, B;
-                            HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                                // Find the address of the pixel to draw.
+                                pBackBuffer += row * bitmap.BackBufferStride;
+                                pBackBuffer += column * 4;
 
-                            // Compute the pixel's color.
-                            int color_data = R << 16; // R
-                            color_data |= G << 8;   // G
-                            color_data |= B << 0;   // B
+                                int R, G, B;
+                                HsvToRgb(result[index], 1.0, result[index] < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                                index++;
 
-                            // Assign the color data to the pixel.
-                            *((int*)pBackBuffer) = color_data;
+                                // Compute the pixel's color.
+                                int color_data = R << 16; // R
+                                color_data |= G << 8;   // G
+                                color_data |= B << 0;   // B
+
+                                // Assign the color data to the pixel.
+                                *((int*)pBackBuffer) = color_data;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        {
+                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            {
+                                // Get a pointer to the back buffer.
+                                IntPtr pBackBuffer = bitmap.BackBuffer;
+
+                                // Find the address of the pixel to draw.
+                                pBackBuffer += row * bitmap.BackBufferStride;
+                                pBackBuffer += column * 4;
+
+                                int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
+
+                                int R, G, B;
+                                HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+
+                                // Compute the pixel's color.
+                                int color_data = R << 16; // R
+                                color_data |= G << 8;   // G
+                                color_data |= B << 0;   // B
+
+                                // Assign the color data to the pixel.
+                                *((int*)pBackBuffer) = color_data;
+                            }
                         }
                     }
                     stopWatch.Stop();
                     Console.WriteLine($"Elapsed time: {stopWatch.ElapsedMilliseconds} milliseconds");
+                    // BLI AV MED BUFFER!!!!! KRASHAR AV MEMORY EFTER MÅNGA KLICK!!!
                 }
 
                 // Specify the area of the bitmap that changed.
