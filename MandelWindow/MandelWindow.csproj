@@ -39,6 +39,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataHandler.cs" />
+    <Compile Include="ExperimentHandler.cs" />
+    <Compile Include="FileHandler.cs" />
     <Compile Include="Kernels.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

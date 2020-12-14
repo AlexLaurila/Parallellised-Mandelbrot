@@ -16,11 +16,11 @@ namespace MandelWindow
 		{
 			var filePath = Path.Combine(BasePath, "Results.csv");
 
-			var output = new List<string> { header, "Parameter, Time" };
+			var output = new List<string> { header, "Parameter\tTime" };
 			
 			foreach (var (parameter, timeSpan) in outputList)
 			{
-				output.Add($"{parameter},{timeSpan}");
+				output.Add($"{parameter}\t{timeSpan}");
 			}
 			
 			File.AppendAllLines(filePath, output);
