@@ -15,7 +15,6 @@ namespace MandelWindow
 		public ExperimentHandler()
 		{
 			Experiment1Parameters = SetExperiment1Parameters();
-			//Experiment2Parameters = SetExperiment2Parameters();
 			Experiment3Parameters = SetExperiment3Parameters();
 		}
 
@@ -29,11 +28,6 @@ namespace MandelWindow
 				4000,
 				6000
 			};
-		}
-
-		private List<(int, int)> SetExperiment2Parameters()
-		{
-			throw new NotImplementedException();
 		}
 
 		private List<(int, int)> SetExperiment3Parameters()
@@ -62,7 +56,6 @@ namespace MandelWindow
 				(2560, 1440)
 			};
 		}
-
 
 		/// <summary>
 		/// Runs experiment calculations sequentially.
