@@ -10,11 +10,6 @@ namespace MandelWindow
 	{
 		public List<(dynamic, double)> ResultData { get; set; } = new List<(dynamic, double)>();
 
-		public DataHandler()
-		{
-			
-		}
-
 		public void SaveData(dynamic parameterValue, double timeSpan)
 		{
 			ResultData.Add((parameterValue, timeSpan));

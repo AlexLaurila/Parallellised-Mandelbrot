@@ -80,234 +80,191 @@ namespace MandelWindow
             FileHandler = new FileHandler();
             ExperimentHandler = new ExperimentHandler();
 
+            // Experiments
+            for (int i = 1; i < 4; i++)
+			{
+				#region Sequential Section
 
-            #region Experiment 1
+				Console.WriteLine($"Running Experiment {i} sequentially");
 
-            //for (int i = 1; i < 2; i++) // TODO: Change loop to fit and work with all 3 experiments.
-            //{
-	           // #region Sequential
+				#region Experiment 1
 
-	           // Console.WriteLine($"Running Experiment {i} sequentially");
-	           // foreach (var parameter in ExperimentHandler.Experiment1Parameters)
-	           // {
-		          //  mandelDepth = parameter;
-		          //  var stopwatch = Stopwatch.StartNew();
-		          //  ExperimentHandler.RunExperiment(UpdateMandel);
-		          //  stopwatch.Stop();
-		          //  DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
-		          //  Console.Write(".");
-	           // }
-
-	           // Console.WriteLine($" Experiment {i} Complete");
-
-	           // // Save results to file
-	           // var header = $"Experiment {i} Sequential\t";
-	           // FileHandler.SaveToFile(DataHandler.ResultData, header);
-
-	           // // Reset ResultData before next
-	           // DataHandler.ResultData.Clear();
-
-	           // #endregion
-
-	           // // Run UpdateMandel with GPU first time outside the test.
-	           // // ------------------------------------------------------
-	           // mandelDepth = 360;
-	           // ExperimentHandler.RunExperimentParallel(UpdateMandel);
-	           // // ------------------------------------------------------
-
-	           // #region Parallel
-
-	           // Console.WriteLine($"Running Experiment {i} Parallel");
-	           // foreach (var parameter in ExperimentHandler.Experiment1Parameters)
-	           // {
-		          //  mandelDepth = parameter;
-		          //  var stopwatch = Stopwatch.StartNew();
-		          //  ExperimentHandler.RunExperimentParallel(UpdateMandel);
-		          //  stopwatch.Stop();
-		          //  DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
-		          //  Console.Write(".");
-	           // }
-
-	           // Console.WriteLine($" Experiment {i} Complete");
-
-	           // // Save results to file
-	           // header = $"Experiment {i} Parallel\t";
-	           // FileHandler.SaveToFile(DataHandler.ResultData, header);
-
-	           // // Reset ResultData before next
-	           // DataHandler.ResultData.Clear();
-
-	           // #endregion
-            //}
-
-            #endregion
-
-
-            #region Experiment 2
-
-            for (int i = 2; i < 3; i++) // TODO: Change loop to fit and work with all 3 experiments.
-            {
-                #region Sequential
-
-                Console.WriteLine($"Running Experiment {i} sequentially");
-                int iteration = 0;
-                while (iteration < 20)
-                {
-	                var stopwatch = Stopwatch.StartNew();
-	                ExperimentHandler.RunExperiment(UpdateMandel);
-	                stopwatch.Stop();
-	                DataHandler.SaveData((mandelWidth, mandelHeight), stopwatch.Elapsed.TotalSeconds);
-	                Console.Write(".");
-
-	                mandelWidth /= 2;
-	                mandelHeight /= 2;
-
-	                iteration++;
-                }
-
-                Console.WriteLine($" Experiment {i} Complete");
-
-                // Save results to file
-                var header = $"Experiment {i} Sequential\t";
-                FileHandler.SaveToFile(DataHandler.ResultData, header);
-
-                // Reset ResultData before next
-                DataHandler.ResultData.Clear();
+				if (i == 1)
+				{
+					foreach (var parameter in ExperimentHandler.Experiment1Parameters)
+					{
+						mandelDepth = parameter;
+						var stopwatch = Stopwatch.StartNew();
+						ExperimentHandler.RunExperiment(UpdateMandel);
+						stopwatch.Stop();
+						DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+						Console.Write(".");
+					}
+				}
 
                 #endregion
 
-                // Run UpdateMandel with GPU first time outside the test.
-                // ------------------------------------------------------
-                mandelDepth = 360;
-                ExperimentHandler.RunExperimentParallel(UpdateMandel);
-                // ------------------------------------------------------
+                #region Experiment 2
 
-                #region Parallel
-
-                Console.WriteLine($"Running Experiment {i} Parallel");
-                iteration = 0;
-
-                mandelWidth = 2.0;
-                mandelHeight = 2.0;
-
-                while (iteration < 20)
+                if (i == 2)
                 {
-	                var stopwatch = Stopwatch.StartNew();
-	                ExperimentHandler.RunExperimentParallel(UpdateMandel);
-                    stopwatch.Stop();
-	                DataHandler.SaveData((mandelWidth, mandelHeight), stopwatch.Elapsed.TotalSeconds);
-	                Console.Write(".");
+	                int iteration = 0;
+	                while (iteration < 20)
+	                {
+		                var stopwatch = Stopwatch.StartNew();
+		                ExperimentHandler.RunExperiment(UpdateMandel);
+		                stopwatch.Stop();
+		                DataHandler.SaveData((mandelWidth, mandelHeight), stopwatch.Elapsed.TotalSeconds);
+		                Console.Write(".");
 
-	                mandelWidth /= 2;
-	                mandelHeight /= 2;
+		                mandelWidth /= 2;
+		                mandelHeight /= 2;
 
-	                iteration++;
+		                iteration++;
+	                }
                 }
+
+                #endregion
+
+                #region Experiment 3
+
+                if (i == 3)
+                {
+	                foreach (var parameter in ExperimentHandler.Experiment3Parameters)
+	                {
+		                bitmap = new WriteableBitmap(
+			                (int)parameter.Item1,
+			                (int)parameter.Item2,
+			                96,
+			                96,
+			                PixelFormats.Bgr32,
+			                null);
+
+		                image.Source = bitmap;
+
+		                totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+		                cx = new double[totalPixels];
+		                cy = new double[totalPixels];
+		                result = new int[totalPixels];
+
+		                var stopwatch = Stopwatch.StartNew();
+		                ExperimentHandler.RunExperiment(UpdateMandel);
+		                stopwatch.Stop();
+		                DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+		                Console.Write(".");
+	                }
+                }
+
+                #endregion
 
                 Console.WriteLine($" Experiment {i} Complete");
 
-                // Save results to file
-                header = $"Experiment {i} Parallel\t";
-                FileHandler.SaveToFile(DataHandler.ResultData, header);
+				// Save results to file
+				var header = $"Experiment {i} Sequential\t";
+				FileHandler.SaveToFile(DataHandler.ResultData, header);
 
-                // Reset ResultData before next
-                DataHandler.ResultData.Clear();
+				// Reset ResultData before next
+				DataHandler.ResultData.Clear();
+
+				#endregion
+
+
+				// Run UpdateMandel with GPU first time outside the test.
+				// ------------------------------------------------------
+				mandelDepth = 360;
+				ExperimentHandler.RunExperimentParallel(UpdateMandel);
+				// ------------------------------------------------------
+
+
+				#region Parallel Section
+
+				Console.WriteLine($"Running Experiment {i} Parallel");
+
+				#region Experiment 1
+
+				if (i == 1)
+				{
+					foreach (var parameter in ExperimentHandler.Experiment1Parameters)
+					{
+						mandelDepth = parameter;
+						var stopwatch = Stopwatch.StartNew();
+						ExperimentHandler.RunExperimentParallel(UpdateMandel);
+						stopwatch.Stop();
+						DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+						Console.Write(".");
+					}
+				}
 
                 #endregion
-            }
 
-            #endregion
+                #region Experiment 2
 
+                if (i == 2)
+                {
+	                var iteration = 0;
 
-            #region Experiment 3
+	                mandelWidth = 2.0;
+	                mandelHeight = 2.0;
 
-            //for (int i = 3; i < 4; i++) // TODO: Change loop to fit and work with all 3 experiments.
-            //{
-	           // #region Sequential
+	                while (iteration < 20)
+	                {
+		                var stopwatch = Stopwatch.StartNew();
+		                ExperimentHandler.RunExperimentParallel(UpdateMandel);
+		                stopwatch.Stop();
+		                DataHandler.SaveData((mandelWidth, mandelHeight), stopwatch.Elapsed.TotalSeconds);
+		                Console.Write(".");
 
-	           // Console.WriteLine($"Running Experiment {i} sequentially");
-	           // foreach (var parameter in ExperimentHandler.Experiment3Parameters)
-	           // {
-		          //  bitmap = new WriteableBitmap(
-			         //   (int)parameter.Item1,
-			         //   (int)parameter.Item2,
-			         //   96,
-			         //   96,
-			         //   PixelFormats.Bgr32,
-			         //   null);
+		                mandelWidth /= 2;
+		                mandelHeight /= 2;
 
-		          //  image.Source = bitmap;
+		                iteration++;
+	                }
+                }
 
-		          //  totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
-		          //  cx = new double[totalPixels];
-		          //  cy = new double[totalPixels];
-		          //  result = new int[totalPixels];
+                #endregion
 
-            //        var stopwatch = Stopwatch.StartNew();
-		          //  ExperimentHandler.RunExperiment(UpdateMandel);
-		          //  stopwatch.Stop();
-		          //  DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
-		          //  Console.Write(".");
-	           // }
+                #region Experiment 3
 
-	           // Console.WriteLine($" Experiment {i} Complete");
+                if (i == 3)
+                {
+	                foreach (var parameter in ExperimentHandler.Experiment3Parameters)
+	                {
+		                bitmap = new WriteableBitmap(
+			                (int)parameter.Item1,
+			                (int)parameter.Item2,
+			                96,
+			                96,
+			                PixelFormats.Bgr32,
+			                null);
 
-	           // // Save results to file
-	           // var header = $"Experiment {i} Sequential\t";
-	           // FileHandler.SaveToFile(DataHandler.ResultData, header);
+		                image.Source = bitmap;
 
-	           // // Reset ResultData before next
-	           // DataHandler.ResultData.Clear();
+		                totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+		                cx = new double[totalPixels];
+		                cy = new double[totalPixels];
+		                result = new int[totalPixels];
 
-	           // #endregion
+		                var stopwatch = Stopwatch.StartNew();
+		                ExperimentHandler.RunExperimentParallel(UpdateMandel);
+		                stopwatch.Stop();
+		                DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+		                Console.Write(".");
+	                }
+                }
 
-	           // // Run UpdateMandel with GPU first time outside the test.
-	           // // ------------------------------------------------------
-	           // mandelDepth = 360;
-	           // ExperimentHandler.RunExperimentParallel(UpdateMandel);
-	           // // ------------------------------------------------------
+                #endregion
 
-	           // #region Parallel
+                Console.WriteLine($" Experiment {i} Complete");
 
-	           // Console.WriteLine($"Running Experiment {i} Parallel");
-	           // foreach (var parameter in ExperimentHandler.Experiment3Parameters)
-	           // {
-		          //  bitmap = new WriteableBitmap(
-			         //   (int)parameter.Item1,
-			         //   (int)parameter.Item2,
-			         //   96,
-			         //   96,
-			         //   PixelFormats.Bgr32,
-			         //   null);
+				// Save results to file
+				header = $"Experiment {i} Parallel\t";
+				FileHandler.SaveToFile(DataHandler.ResultData, header);
 
-		          //  image.Source = bitmap;
+				// Reset ResultData before next
+				DataHandler.ResultData.Clear();
 
-		          //  totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
-		          //  cx = new double[totalPixels];
-		          //  cy = new double[totalPixels];
-		          //  result = new int[totalPixels];
-
-            //        var stopwatch = Stopwatch.StartNew();
-		          //  ExperimentHandler.RunExperimentParallel(UpdateMandel);
-		          //  stopwatch.Stop();
-		          //  DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
-		          //  Console.Write(".");
-	           // }
-
-	           // Console.WriteLine($" Experiment {i} Complete");
-
-	           // // Save results to file
-	           // header = $"Experiment {i} Parallel\t";
-	           // FileHandler.SaveToFile(DataHandler.ResultData, header);
-
-	           // // Reset ResultData before next
-	           // DataHandler.ResultData.Clear();
-
-	           // #endregion
-            //}
-
-            #endregion
-
+				#endregion
+			}
 
             Application app = new Application();
             app.Run();
