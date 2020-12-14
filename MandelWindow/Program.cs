@@ -73,7 +73,6 @@ namespace MandelWindow
             cy = new double[totalPixels];
             result = new int[totalPixels];
 
-
             // Initialize Experiment
             DataHandler = new DataHandler();
             FileHandler = new FileHandler();
@@ -168,7 +167,12 @@ namespace MandelWindow
 
 		            image.Source = bitmap;
 
-		            var stopwatch = Stopwatch.StartNew();
+		            totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+		            cx = new double[totalPixels];
+		            cy = new double[totalPixels];
+		            result = new int[totalPixels];
+
+                    var stopwatch = Stopwatch.StartNew();
 		            ExperimentHandler.RunExperiment(UpdateMandel);
 		            stopwatch.Stop();
 		            DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
@@ -207,7 +211,12 @@ namespace MandelWindow
 
 		            image.Source = bitmap;
 
-		            var stopwatch = Stopwatch.StartNew();
+		            totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+		            cx = new double[totalPixels];
+		            cy = new double[totalPixels];
+		            result = new int[totalPixels];
+
+                    var stopwatch = Stopwatch.StartNew();
 		            ExperimentHandler.RunExperimentParallel(UpdateMandel);
 		            stopwatch.Stop();
 		            DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
