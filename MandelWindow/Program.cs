@@ -252,6 +252,10 @@ namespace MandelWindow
 	                }
                 }
 
+                mandelDepth = 360;
+                mandelWidth = 2.0;
+                mandelHeight = 2.0;
+
                 #endregion
 
                 Console.WriteLine($" Experiment {i} Complete");
