@@ -16,7 +16,7 @@ namespace MandelWindow
 		{
 			Experiment1Parameters = SetExperiment1Parameters();
 			//Experiment2Parameters = SetExperiment2Parameters();
-			//Experiment3Parameters = SetExperiment3Parameters();
+			Experiment3Parameters = SetExperiment3Parameters();
 		}
 
 		private List<int> SetExperiment1Parameters()
@@ -38,7 +38,29 @@ namespace MandelWindow
 
 		private List<(int, int)> SetExperiment3Parameters()
 		{
-			throw new NotImplementedException();
+			return new List<(int, int)>
+			{
+				(128, 72),
+				(256, 144),
+				(384, 216),
+				(512, 216),
+				(640, 360),
+				(768, 432),
+				(896, 504),
+				(1024, 576),
+				(1152, 648),
+				(1280, 720),
+				(1408, 792),
+				(1536, 864),
+				(1664, 936),
+				(1792, 1008),
+				(1920, 1080),
+				(2048, 1152),
+				(2176, 1224),
+				(2304, 1296),
+				(2432, 1368),
+				(2560, 1440)
+			};
 		}
 
 

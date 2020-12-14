@@ -67,42 +67,44 @@ namespace MandelWindow
             FileHandler = new FileHandler();
             ExperimentHandler = new ExperimentHandler();
 
-            // Experiments
-            for (int i = 1; i < 2; i++)
+
+            #region Experiment 1
+
+            for (int i = 1; i < 2; i++) // TODO: Change loop to fit and work with all 3 experiments.
             {
-				#region Sequential
+	            #region Sequential
 
-				Console.WriteLine($"Running Experiment {i} sequentially");
-				foreach (var parameter in ExperimentHandler.Experiment1Parameters)
-				{
-					mandelDepth = parameter;
-					var stopwatch = Stopwatch.StartNew();
-					ExperimentHandler.RunExperiment(UpdateMandel);
-					stopwatch.Stop();
-					DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
-					Console.Write(".");
-				}
+	            Console.WriteLine($"Running Experiment {i} sequentially");
+	            foreach (var parameter in ExperimentHandler.Experiment1Parameters)
+	            {
+		            mandelDepth = parameter;
+		            var stopwatch = Stopwatch.StartNew();
+		            ExperimentHandler.RunExperiment(UpdateMandel);
+		            stopwatch.Stop();
+		            DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+		            Console.Write(".");
+	            }
 
-				Console.WriteLine($" Experiment {i} Complete");
+	            Console.WriteLine($" Experiment {i} Complete");
 
-				// Save results to file
-				var header = $"Experiment {i} Sequential\t";
-				FileHandler.SaveToFile(DataHandler.ResultData, header);
+	            // Save results to file
+	            var header = $"Experiment {i} Sequential\t";
+	            FileHandler.SaveToFile(DataHandler.ResultData, header);
 
-				// Reset ResultData before next
-				DataHandler.ResultData.Clear();
+	            // Reset ResultData before next
+	            DataHandler.ResultData.Clear();
 
-				#endregion
+	            #endregion
 
-				// Run UpdateMandel with GPU first time outside the test.
-				// ------------------------------------------------------
-				mandelDepth = 100;
-                ExperimentHandler.RunExperimentParallel(UpdateMandel);
-                // ------------------------------------------------------
+	            // Run UpdateMandel with GPU first time outside the test.
+	            // ------------------------------------------------------
+	            mandelDepth = 100;
+	            ExperimentHandler.RunExperimentParallel(UpdateMandel);
+	            // ------------------------------------------------------
 
-                #region Parallel
+	            #region Parallel
 
-                Console.WriteLine($"Running Experiment {i} Parallel");
+	            Console.WriteLine($"Running Experiment {i} Parallel");
 	            foreach (var parameter in ExperimentHandler.Experiment1Parameters)
 	            {
 		            mandelDepth = parameter;
@@ -124,6 +126,95 @@ namespace MandelWindow
 
 	            #endregion
             }
+
+            #endregion
+
+
+            #region Experiment 2
+
+            
+
+            #endregion
+
+
+            #region Experiment 3
+
+            for (int i = 3; i < 4; i++) // TODO: Change loop to fit and work with all 3 experiments.
+            {
+	            #region Sequential
+
+	            Console.WriteLine($"Running Experiment {i} sequentially");
+	            foreach (var parameter in ExperimentHandler.Experiment3Parameters)
+	            {
+		            bitmap = new WriteableBitmap(
+			            (int)parameter.Item1,
+			            (int)parameter.Item2,
+			            96,
+			            96,
+			            PixelFormats.Bgr32,
+			            null);
+
+		            image.Source = bitmap;
+
+		            var stopwatch = Stopwatch.StartNew();
+		            ExperimentHandler.RunExperiment(UpdateMandel);
+		            stopwatch.Stop();
+		            DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+		            Console.Write(".");
+	            }
+
+	            Console.WriteLine($" Experiment {i} Complete");
+
+	            // Save results to file
+	            var header = $"Experiment {i} Sequential\t";
+	            FileHandler.SaveToFile(DataHandler.ResultData, header);
+
+	            // Reset ResultData before next
+	            DataHandler.ResultData.Clear();
+
+	            #endregion
+
+	            // Run UpdateMandel with GPU first time outside the test.
+	            // ------------------------------------------------------
+	            mandelDepth = 100;
+	            ExperimentHandler.RunExperimentParallel(UpdateMandel);
+	            // ------------------------------------------------------
+
+	            #region Parallel
+
+	            Console.WriteLine($"Running Experiment {i} Parallel");
+	            foreach (var parameter in ExperimentHandler.Experiment3Parameters)
+	            {
+		            bitmap = new WriteableBitmap(
+			            (int)parameter.Item1,
+			            (int)parameter.Item2,
+			            96,
+			            96,
+			            PixelFormats.Bgr32,
+			            null);
+
+		            image.Source = bitmap;
+
+		            var stopwatch = Stopwatch.StartNew();
+		            ExperimentHandler.RunExperimentParallel(UpdateMandel);
+		            stopwatch.Stop();
+		            DataHandler.SaveData(parameter, stopwatch.Elapsed.TotalSeconds);
+		            Console.Write(".");
+	            }
+
+	            Console.WriteLine($" Experiment {i} Complete");
+
+	            // Save results to file
+	            header = $"Experiment {i} Parallel\t";
+	            FileHandler.SaveToFile(DataHandler.ResultData, header);
+
+	            // Reset ResultData before next
+	            DataHandler.ResultData.Clear();
+
+	            #endregion
+            }
+
+            #endregion
 
 
             Application app = new Application();
@@ -197,9 +288,12 @@ namespace MandelWindow
         //Mandel dimensions
         static double mandelCenterX = 0.0;
         static double mandelCenterY = 0.0;
+
+        // Parameter for Experiment 2
         static double mandelWidth = 2.0;
         static double mandelHeight = 2.0;
 
+        // Parameter for Experiment 1
         public static int mandelDepth = 360;
 
         public static void UpdateMandel(bool parallel = true)
