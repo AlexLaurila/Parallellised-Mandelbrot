@@ -25,6 +25,11 @@ namespace MandelWindow
         static DataHandler DataHandler { get; set; }
         static FileHandler FileHandler { get; set; }
         static ExperimentHandler ExperimentHandler { get; set; }
+        static OpenCLCompiler compiler = new OpenCLCompiler();
+        static int totalPixels;
+        static double[] cx;
+        static double[] cy;
+        static int[] result;
 
 
         [STAThread]
@@ -60,6 +65,13 @@ namespace MandelWindow
                 new MouseEventHandler(image_MouseMove);
 
             windows.MouseWheel += new MouseWheelEventHandler(window_MouseWheel);
+
+            compiler.UseDevice(0);
+            compiler.CompileKernel(typeof(Kernels));
+            totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
+            cx = new double[totalPixels];
+            cy = new double[totalPixels];
+            result = new int[totalPixels];
 
 
             // Initialize Experiment
@@ -213,14 +225,6 @@ namespace MandelWindow
                 {
                     if (parallel)
                     {
-                        var compiler = new OpenCLCompiler();
-                        compiler.UseDevice(0);
-                        compiler.CompileKernel(typeof(Kernels));
-                        int totalPixels = bitmap.PixelHeight * bitmap.PixelWidth;
-                        double[] cx = new double[totalPixels];
-                        double[] cy = new double[totalPixels];
-                        int[] result = new int[totalPixels];
-
                         int index = 0;
                         for (int row = 0; row < bitmap.PixelHeight; row++)
                         {
@@ -232,67 +236,41 @@ namespace MandelWindow
                                 index++;
                             }
                         }
-
                         var exec = compiler.GetExec();
                         exec.IterCount(cx, cy, result, mandelDepth);
-                        compiler.Dispose();
-
-
-                        index = 0;
-                        for (int row = 0; row < bitmap.PixelHeight; row++)
-                        {
-                            for (int column = 0; column < bitmap.PixelWidth; column++)
-                            {
-                                // Get a pointer to the back buffer.
-                                IntPtr pBackBuffer = bitmap.BackBuffer;
-
-                                // Find the address of the pixel to draw.
-                                pBackBuffer += row * bitmap.BackBufferStride;
-                                pBackBuffer += column * 4;
-
-                                int R, G, B;
-                                HsvToRgb(result[index], 1.0, result[index] < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
-                                index++;
-
-                                // Compute the pixel's color.
-                                int color_data = R << 16; // R
-                                color_data |= G << 8;   // G
-                                color_data |= B << 0;   // B
-
-                                // Assign the color data to the pixel.
-                                *((int*)pBackBuffer) = color_data;
-                            }
-                        }
-                        //Array.Clear(cx, 0, cx.Length);
-                        //Array.Clear(cy, 0, cy.Length);
-                        //Array.Clear(result, 0, result.Length);
                     }
-                    else
+
+                    int i = 0;
+                    for (int row = 0; row < bitmap.PixelHeight; row++)
                     {
-                        for (int row = 0; row < bitmap.PixelHeight; row++)
+                        for (int column = 0; column < bitmap.PixelWidth; column++)
                         {
-                            for (int column = 0; column < bitmap.PixelWidth; column++)
+                            // Get a pointer to the back buffer.
+                            IntPtr pBackBuffer = bitmap.BackBuffer;
+
+                            // Find the address of the pixel to draw.
+                            pBackBuffer += row * bitmap.BackBufferStride;
+                            pBackBuffer += column * 4;
+
+                            int R, G, B;
+                            if (parallel)
                             {
-                                // Get a pointer to the back buffer.
-                                IntPtr pBackBuffer = bitmap.BackBuffer;
-
-                                // Find the address of the pixel to draw.
-                                pBackBuffer += row * bitmap.BackBufferStride;
-                                pBackBuffer += column * 4;
-
-                                int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
-
-                                int R, G, B;
-                                HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
-
-                                // Compute the pixel's color.
-                                int color_data = R << 16; // R
-                                color_data |= G << 8;   // G
-                                color_data |= B << 0;   // B
-
-                                // Assign the color data to the pixel.
-                                *((int*)pBackBuffer) = color_data;
+                                HsvToRgb(result[i], 1.0, result[i] < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                                i++;
                             }
+                            else
+                            {
+                                int light = IterCount(mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth), mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight));
+                                HsvToRgb(light, 1.0, light < mandelDepth ? 1.0 : 0.0, out R, out G, out B);
+                            }
+
+                            // Compute the pixel's color.
+                            int color_data = R << 16; // R
+                            color_data |= G << 8;   // G
+                            color_data |= B << 0;   // B
+
+                            // Assign the color data to the pixel.
+                            *((int*)pBackBuffer) = color_data;
                         }
                     }
                 }
