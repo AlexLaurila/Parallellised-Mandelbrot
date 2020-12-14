@@ -318,21 +318,7 @@ namespace MandelWindow
                 unsafe
                 {
                     if (parallel)
-                    {
-                        int index = 0;
-                        for (int row = 0; row < bitmap.PixelHeight; row++)
-                        {
-                            for (int column = 0; column < bitmap.PixelWidth; column++)
-                            {
-                                cy[index] = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
-                                cx[index] = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
-                                result[index] = 0;
-                                index++;
-                            }
-                        }
-                        var exec = compiler.GetExec();
-                        exec.IterCount(cx, cy, result, mandelDepth);
-                    }
+                        IterCountParallel();
 
                     int i = 0;
                     for (int row = 0; row < bitmap.PixelHeight; row++)
@@ -378,6 +364,25 @@ namespace MandelWindow
                 bitmap.Unlock();
             }
         }
+
+        private static void IterCountParallel()
+        {
+            int index = 0;
+            for (int row = 0; row < bitmap.PixelHeight; row++)
+            {
+                for (int column = 0; column < bitmap.PixelWidth; column++)
+                {
+                    cy[index] = mandelCenterY - mandelHeight + row * ((mandelHeight * 2.0) / bitmap.PixelHeight);
+                    cx[index] = mandelCenterX - mandelWidth + column * ((mandelWidth * 2.0) / bitmap.PixelWidth);
+                    result[index] = 0;
+                    index++;
+                }
+            }
+
+            var exec = compiler.GetExec();
+            exec.IterCount(cx, cy, result, mandelDepth);
+        }
+
         public static int IterCount(double cx, double cy)
         {
             int result = 0;
