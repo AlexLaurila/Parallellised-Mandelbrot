@@ -12,7 +12,6 @@ namespace MandelWindow
         [OpenCLKernel]
         void IterCount([Global] double[] cx, [Global] double[] cy, [Global] int[] result, int mandelDepth)
         {
-            //int result = 0;      //Skicka in lista med massa 0.
             int i = get_global_id(0);
             double x = 0.0f;
             double y = 0.0f;
