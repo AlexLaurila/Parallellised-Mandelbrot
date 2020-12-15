@@ -9,7 +9,9 @@ namespace MandelWindow
 	public class ExperimentHandler
 	{
 		public List<int> Experiment1Parameters { get; set; }
-		public List<(int, int)> Experiment2Parameters { get; set; }
+
+		// Experiment2Parameters not needed here, because it is calculated at runtime.
+		
 		public List<(int, int)> Experiment3Parameters { get; set; }
 
 		public ExperimentHandler()

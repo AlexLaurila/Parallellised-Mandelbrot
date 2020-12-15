@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -80,6 +81,8 @@ namespace MandelWindow
             FileHandler = new FileHandler();
             ExperimentHandler = new ExperimentHandler();
 
+            Console.WriteLine("A dot indicates a finished iteration within the experiment.\n");
+
             // Experiments
             for (int i = 1; i < 4; i++)
 			{
@@ -109,7 +112,12 @@ namespace MandelWindow
                 if (i == 2)
                 {
 	                int iteration = 0;
-	                while (iteration < 20)
+
+                    // Set coordinates
+                    mandelCenterX = -0.836078057520919;
+                    mandelCenterY = -0.204835379237024;
+
+                    while (iteration < 20)
 	                {
 		                var stopwatch = Stopwatch.StartNew();
 		                ExperimentHandler.RunExperiment(UpdateMandel);
@@ -206,7 +214,11 @@ namespace MandelWindow
 	                mandelWidth = 2.0;
 	                mandelHeight = 2.0;
 
-	                while (iteration < 20)
+	                // Set coordinates
+	                mandelCenterX = -0.836078057520919;
+	                mandelCenterY = -0.204835379237024;
+
+                    while (iteration < 20)
 	                {
 		                var stopwatch = Stopwatch.StartNew();
 		                ExperimentHandler.RunExperimentParallel(UpdateMandel);
@@ -252,6 +264,9 @@ namespace MandelWindow
 	                }
                 }
 
+                // Reset parameters between experiments
+                mandelCenterX = 0;
+                mandelCenterY = 0;
                 mandelDepth = 360;
                 mandelWidth = 2.0;
                 mandelHeight = 2.0;
