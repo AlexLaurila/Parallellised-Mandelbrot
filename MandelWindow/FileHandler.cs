@@ -11,14 +11,19 @@ namespace MandelWindow
 	public class FileHandler
 	{
 		public string BasePath { get; set; } = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+		public string FilePath { get; set; }
+
+		public FileHandler()
+		{
+			FilePath = Path.Combine(BasePath, "Results.csv");
+		}
 
 		public void SaveToFile(List<(dynamic, double)> outputList, string header)
 		{
-			var filePath = Path.Combine(BasePath, "Results.csv");
+			var FilePath = Path.Combine(BasePath, "Results.csv");
 
 			var output = new List<string>
 			{
-				$"\nSession started at: {DateTime.Now}",
 				header,
 				"Parameter\tTime"
 			};
@@ -28,7 +33,12 @@ namespace MandelWindow
 				output.Add($"{parameter}\t{timeSpan}");
 			}
 			
-			File.AppendAllLines(filePath, output);
+			File.AppendAllLines(FilePath, output);
+		}
+
+		public void NewSessionStarted()
+		{
+			File.AppendAllText(FilePath,$"\nNew experiment session started at: {DateTime.Now}");
 		}
 	}
 }

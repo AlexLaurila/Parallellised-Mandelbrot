@@ -84,6 +84,7 @@ namespace MandelWindow
             Console.WriteLine("A dot indicates a finished iteration within the experiment.\n");
 
             // Experiments
+            FileHandler.NewSessionStarted();
             for (int i = 1; i < 4; i++)
 			{
 				#region Sequential Section
