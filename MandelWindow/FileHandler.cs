@@ -20,7 +20,7 @@ namespace MandelWindow
 
 		public void SaveToFile(List<(dynamic, double)> outputList, string header)
 		{
-			var FilePath = Path.Combine(BasePath, "Results.csv");
+			FilePath = Path.Combine(BasePath, "Results.csv");
 
 			var output = new List<string>
 			{
