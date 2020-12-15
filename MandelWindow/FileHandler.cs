@@ -16,7 +16,12 @@ namespace MandelWindow
 		{
 			var filePath = Path.Combine(BasePath, "Results.csv");
 
-			var output = new List<string> { header, "Parameter\tTime" };
+			var output = new List<string>
+			{
+				$"\nSession started at: {DateTime.Now}",
+				header,
+				"Parameter\tTime"
+			};
 			
 			foreach (var (parameter, timeSpan) in outputList)
 			{
